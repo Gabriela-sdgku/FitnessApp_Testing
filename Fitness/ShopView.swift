@@ -2,7 +2,7 @@
 //  ShopView.swift
 //  Fitness
 //
-//
+
 import SwiftUI
 
 struct ShopView: View {
@@ -16,7 +16,7 @@ struct ShopView: View {
     ]
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack {
                 ScrollView {
                     VStack(spacing: 16) {
@@ -49,6 +49,7 @@ struct ShopView: View {
                 
                 if showPurchaseSuccess {
                     StatusOverlay(title: "Credits Added!", icon: "creditcard.fill", color: .blue)
+                        .zIndex(1)
                 }
             }
             .navigationTitle("Buy Credits")
@@ -57,6 +58,7 @@ struct ShopView: View {
     
     private func triggerPurchase(_ amount: Int) {
         vm.addCredits(amount)
+        UINotificationFeedbackGenerator().notificationOccurred(.success)
         withAnimation(.spring()) {
             showPurchaseSuccess = true
         }
@@ -67,7 +69,10 @@ struct ShopView: View {
 }
 
 struct StatusOverlay: View {
-    let title: String; let icon: String; let color: Color
+    let title: String
+    let icon: String
+    let color: Color
+    
     var body: some View {
         VStack(spacing: 15) {
             Image(systemName: icon).font(.system(size: 60)).foregroundColor(color)

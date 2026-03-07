@@ -2,7 +2,6 @@
 //  MainTabView.swift
 //  Fitness
 //
-//
 
 import SwiftUI
 

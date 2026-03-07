@@ -2,77 +2,88 @@
 //  ScheduleView.swift
 //  Fitness
 //
-//
-
 
 import SwiftUI
 
 struct ScheduleView: View {
     @Environment(AppViewModel.self) private var vm
-        
-        @State private var selectedDayIndex = 0
-        @State private var showBookingSuccess = false
+    @State private var selectedDayIndex = 0
     
-    let classes = ["Hot Pilates", "Power Flow", "Reformer Sculpt", "HIIT Burn"]
+    // Mock schedule data
+    let dailySchedule: [StudioClass] = [
+        StudioClass(name: "Hot Pilates", instructor: "Sofia", time: "08:30 AM", duration: 50, intensity: "High"),
+        StudioClass(name: "Power Flow", instructor: "Elena", time: "10:00 AM", duration: 60, intensity: "Medium"),
+        StudioClass(name: "Reformer Sculpt", instructor: "Valeria", time: "05:30 PM", duration: 45, intensity: "High"),
+        StudioClass(name: "HIIT Burn", instructor: "Mateo", time: "07:00 PM", duration: 45, intensity: "Extreme")
+    ]
     
     var body: some View {
-        NavigationView {
-            ZStack {
-                VStack {
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 12) {
-                            ForEach(0..<5) { index in
-                                DateCard(dayOffset: index, isSelected: selectedDayIndex == index)
-                                    .onTapGesture {
-                                        withAnimation(.spring()) {
-                                            selectedDayIndex = index
-                                        }
+        NavigationStack {
+            VStack(spacing: 0) {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 12) {
+                        ForEach(0..<7) { index in
+                            DateCard(dayOffset: index, isSelected: selectedDayIndex == index)
+                                .onTapGesture {
+                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                        selectedDayIndex = index
+                                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
                                     }
-                            }
+                                }
                         }
-                        .padding()
                     }
+                    .padding()
+                }
+                .background(Color(UIColor.systemBackground))
+                .shadow(color: .black.opacity(0.05), radius: 5, y: 5)
+                
+                // Class List
+                List {
+                    let dateString = getDateString(offset: selectedDayIndex)
                     
-                    List {
-                        ForEach(classes, id: \.self) { fitnessClass in
+                    ForEach(dailySchedule) { studioClass in
+                        let uniqueID = "\(studioClass.name)-\(dateString)-\(studioClass.time)"
+                        let isBooked = vm.isClassBooked(classID: uniqueID)
+                        
+                        NavigationLink(destination: ClassDetailView(studioClass: studioClass, dateString: dateString)) {
                             HStack {
-                                VStack(alignment: .leading) {
-                                    Text("08:30 AM").font(.caption).foregroundColor(.secondary)
-                                    Text(fitnessClass).font(.headline)
+                                VStack(alignment: .leading, spacing: 6) {
+                                    Text(studioClass.time)
+                                        .font(.caption)
+                                        .fontWeight(.bold)
+                                        .foregroundColor(.secondary)
+                                    
+                                    Text(studioClass.name)
+                                        .font(.headline)
+                                    
+                                    Text(studioClass.instructor)
+                                        .font(.subheadline)
+                                        .foregroundColor(.gray)
                                 }
                                 Spacer()
-                                Button(action: { triggerBooking(fitnessClass) }) {
-                                    Text(vm.bookedClasses.contains(fitnessClass) ? "Booked" : "Book")
-                                        .fontWeight(.bold)
-                                        .frame(width: 80)
+                                
+                                if isBooked {
+                                    Image(systemName: "checkmark.circle.fill")
+                                        .foregroundColor(.green)
+                                        .font(.title2)
                                 }
-                                .buttonStyle(.borderedProminent)
-                                .tint(vm.bookedClasses.contains(fitnessClass) ? .gray : .black)
-                                .disabled(vm.bookedClasses.contains(fitnessClass))
                             }
-                            .padding(.vertical, 4)
+                            .padding(.vertical, 8)
                         }
+                        .disabled(isBooked)
                     }
-                    .listStyle(.plain)
                 }
-                
-                if showBookingSuccess {
-                    StatusOverlay(title: "Class Booked!", icon: "checkmark.circle.fill", color: .green)
-                        .transition(.move(edge: .bottom).combined(with: .opacity))
-                }
+                .listStyle(.plain)
             }
             .navigationTitle("Schedule")
         }
     }
     
-    private func triggerBooking(_ name: String) {
-        vm.bookClass(name)
-        withAnimation(.spring()) {
-            showBookingSuccess = true
-        }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-            withAnimation { showBookingSuccess = false }
-        }
+    private func getDateString(offset: Int) -> String {
+        let date = Calendar.current.date(byAdding: .day, value: offset, to: Date()) ?? Date()
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMM d, yyyy"
+        return formatter.string(from: date)
     }
 }
 
@@ -86,7 +97,7 @@ struct DateCard: View {
     
     var dayName: String {
         let formatter = DateFormatter()
-        formatter.dateFormat = "EEE" 
+        formatter.dateFormat = "EEE"
         return formatter.string(from: date).uppercased()
     }
     
