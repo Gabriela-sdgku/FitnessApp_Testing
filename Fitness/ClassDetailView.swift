@@ -16,9 +16,7 @@ struct ClassDetailView: View {
     @State private var showBookingSuccess = false
     @State private var showNoCreditsAlert = false
     
-    let columns = [
-        GridItem(.adaptive(minimum: 60), spacing: 16)
-    ]
+    let columns = [GridItem(.adaptive(minimum: 65), spacing: 16)]
     
     var occupiedSpots: [Int] {
         let hash = abs("\(studioClass.name)-\(dateString)".hashValue)
@@ -27,51 +25,54 @@ struct ClassDetailView: View {
     
     var body: some View {
         ZStack {
+            Color(UIColor.systemGroupedBackground).ignoresSafeArea()
+            
             ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
-                    
+                VStack(spacing: 24) {
+                    // Class Info Header
                     HStack(spacing: 16) {
-                        Image(systemName: "person.crop.circle.fill")
-                            .resizable()
-                            .frame(width: 60, height: 60)
-                            .foregroundColor(.gray.opacity(0.5))
+                        ZStack {
+                            Circle().fill(studioClass.themeColor.opacity(0.1)).frame(width: 60, height: 60)
+                            Image(systemName: "person.fill").font(.title).foregroundColor(studioClass.themeColor)
+                        }
                         
                         VStack(alignment: .leading, spacing: 4) {
-                            Text(studioClass.instructor).font(.title2).bold()
+                            Text(studioClass.instructor).font(.title3).bold()
                             Text("Instructor").font(.subheadline).foregroundColor(.secondary)
                         }
-                        
                         Spacer()
                         
-                        VStack(alignment: .trailing, spacing: 4) {
+                        VStack(alignment: .trailing, spacing: 6) {
                             HStack {
-                                Image(systemName: "clock")
-                                Text("\(studioClass.duration) min")
+                                Text("\(studioClass.duration) min").fontWeight(.medium)
+                                Image(systemName: "clock.fill").foregroundColor(.secondary)
                             }
                             HStack {
-                                Image(systemName: "flame.fill").foregroundColor(.orange)
-                                Text(studioClass.intensity)
+                                Text(studioClass.intensity).fontWeight(.medium)
+                                Image(systemName: "flame.fill").foregroundColor(studioClass.themeColor)
                             }
                         }
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                        .font(.footnote)
                     }
                     .padding()
-                    .background(Color(UIColor.secondarySystemBackground))
-                    .cornerRadius(16)
+                    .background(Color(UIColor.secondarySystemGroupedBackground))
+                    .cornerRadius(20)
+                    .shadow(color: .black.opacity(0.03), radius: 10, y: 5)
                     .padding(.horizontal)
                     
-                    VStack(alignment: .leading) {
-                        Text("Select your spot")
-                            .font(.headline)
-                        Text("Front of Room")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                            .frame(maxWidth: .infinity, alignment: .center)
+                    // Studio Map Header
+                    VStack(spacing: 8) {
+                        Text("Select your spot").font(.title3).bold()
+                        
+                        // Stage visual
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(Color(UIColor.tertiarySystemFill))
+                            .frame(width: 120, height: 30)
+                            .overlay(Text("Instructor").font(.caption).bold().foregroundColor(.secondary))
                             .padding(.top, 10)
                     }
-                    .padding(.horizontal)
                     
+                    // Spots Grid
                     LazyVGrid(columns: columns, spacing: 16) {
                         ForEach(1...20, id: \.self) { spotNumber in
                             let isOccupied = occupiedSpots.contains(spotNumber)
@@ -85,60 +86,70 @@ struct ClassDetailView: View {
                             }) {
                                 Text("\(spotNumber)")
                                     .font(.headline)
-                                    .frame(width: 60, height: 60)
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 65)
                                     .background(backgroundColor(for: spotNumber, isOccupied: isOccupied, isSelected: isSelected))
-                                    .foregroundColor(isOccupied ? .gray : (isSelected ? .white : .primary))
-                                    .cornerRadius(12)
+                                    .foregroundColor(isOccupied ? Color.secondary.opacity(0.5) : (isSelected ? Color(UIColor.systemBackground) : .primary))
+                                    .cornerRadius(16)
                                     .overlay(
-                                        RoundedRectangle(cornerRadius: 12)
-                                            .stroke(isSelected ? Color.black : Color.clear, lineWidth: 2)
+                                        RoundedRectangle(cornerRadius: 16)
+                                            .stroke(isSelected ? Color.primary : Color.clear, lineWidth: 3)
                                     )
                             }
                             .disabled(isOccupied)
                         }
                     }
                     .padding(.horizontal)
-                    .padding(.bottom, 100)
+                    .padding(.bottom, 120)
                 }
+                .padding(.top)
             }
             
+            // Sticky Booking Button
             VStack {
                 Spacer()
                 VStack {
                     Button(action: confirmBooking) {
-                        Text(selectedSpot != nil ? "Book Spot \(selectedSpot!)" : "Select a spot")
+                        Text(selectedSpot != nil ? "Book Spot \(selectedSpot!) • 1 Credit" : "Select an available spot")
                             .font(.headline)
-                            .foregroundColor(.white)
+                            .foregroundColor(Color(UIColor.systemBackground))
                             .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(selectedSpot != nil ? Color.black : Color.gray)
-                            .cornerRadius(16)
+                            .padding(.vertical, 18)
+                            .background(selectedSpot != nil ? Color.primary : Color.secondary.opacity(0.5))
+                            .cornerRadius(20)
+                            .shadow(color: selectedSpot != nil ? Color.primary.opacity(0.3) : .clear, radius: 10, y: 5)
                     }
                     .disabled(selectedSpot == nil)
-                    .padding()
+                    .padding(.horizontal)
+                    .padding(.bottom, 10)
                 }
-                .background(.ultraThinMaterial)
+                .padding(.top, 10)
+                .background(
+                    LinearGradient(gradient: Gradient(colors: [Color(UIColor.systemGroupedBackground).opacity(0), Color(UIColor.systemGroupedBackground)]), startPoint: .top, endPoint: .bottom)
+                )
             }
             .ignoresSafeArea(.keyboard)
             
             if showBookingSuccess {
                 StatusOverlay(title: "Spot Confirmed!", icon: "checkmark.circle.fill", color: .green)
+                    .transition(.scale.combined(with: .opacity))
                     .zIndex(1)
             }
         }
         .navigationTitle(studioClass.name)
         .navigationBarTitleDisplayMode(.inline)
         .alert("Out of Credits", isPresented: $showNoCreditsAlert) {
-            Button("OK", role: .cancel) { }
+            Button("Shop", role: .none) { dismiss() }
+            Button("Cancel", role: .cancel) { }
         } message: {
-            Text("Please purchase more credits in the Shop to book this class.")
+            Text("You need at least 1 credit to book this class. Please purchase more in the Shop.")
         }
     }
     
     private func backgroundColor(for spot: Int, isOccupied: Bool, isSelected: Bool) -> Color {
-        if isOccupied { return Color.gray.opacity(0.2) }
-        if isSelected { return Color.black }
-        return Color.blue.opacity(0.1)
+        if isOccupied { return Color(UIColor.tertiarySystemFill) }
+        if isSelected { return Color.primary }
+        return Color(UIColor.secondarySystemGroupedBackground)
     }
     
     private func confirmBooking() {
@@ -152,16 +163,10 @@ struct ClassDetailView: View {
             spotNumber: spot
         )
         
-        let success = vm.bookSpot(session: newSession)
-        
-        if success {
+        if vm.bookSpot(session: newSession) {
             UINotificationFeedbackGenerator().notificationOccurred(.success)
-            withAnimation(.spring()) {
-                showBookingSuccess = true
-            }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
-                dismiss()
-            }
+            withAnimation(.spring()) { showBookingSuccess = true }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { dismiss() }
         } else {
             UINotificationFeedbackGenerator().notificationOccurred(.error)
             showNoCreditsAlert = true

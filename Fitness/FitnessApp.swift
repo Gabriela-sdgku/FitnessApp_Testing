@@ -13,6 +13,7 @@ struct FitnessApp: App {
         WindowGroup {
             MainTabView()
                 .environment(viewModel)
+                .preferredColorScheme(.light)
         }
     }
 }

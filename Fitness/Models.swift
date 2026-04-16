@@ -3,7 +3,7 @@
 //  Fitness
 //
 
-import Foundation
+import SwiftUI
 
 struct Session: Identifiable, Codable, Hashable {
     var id: String { "\(className)-\(date)-\(time)" }
@@ -21,4 +21,6 @@ struct StudioClass: Identifiable {
     let time: String
     let duration: Int
     let intensity: String
+    let systemImage: String
+    let themeColor: Color
 }

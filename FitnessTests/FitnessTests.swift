@@ -8,7 +8,7 @@
 import XCTest
 @testable import Fitness
 
-final class FitnessTests: XCTest {
+final class FitnessTests: XCTestCase {
     var vm: AppViewModel!
     
     override func setUp() {
@@ -44,4 +44,20 @@ final class FitnessTests: XCTest {
 
              Assert that the availableCredits property has updated back to 5.
      */
+     
+     func testCancellationAndRefund() {
+         // Students: Write your test code here
+     }
+    
+    func testAddCredits_PreventsNegativeAmounts() {
+            // Arrange
+            let initialCredits = 10
+            vm.availableCredits = initialCredits
+            
+            // Act
+            vm.addCredits(-5)
+            
+            // Assert
+            XCTAssertEqual(vm.availableCredits, initialCredits, "The app should ignore negative credit additions to prevent invalid state.")
+        }
 }

@@ -15,7 +15,7 @@ struct MainTabView: View {
             
             ShopView()
                 .tabItem {
-                    Label("Buy Credits", systemImage: "creditcard.fill")
+                    Label("Shop", systemImage: "cart.fill")
                 }
             
             ProfileView()
@@ -23,6 +23,6 @@ struct MainTabView: View {
                     Label("Profile", systemImage: "person.crop.circle")
                 }
         }
-        .accentColor(.black)
+        .accentColor(.primary)
     }
 }

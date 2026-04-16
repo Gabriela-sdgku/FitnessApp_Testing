@@ -15,7 +15,7 @@ final class FitnessUITests: XCTestCase {
         super.setUp()
         continueAfterFailure = false
         app = XCUIApplication()
-        app.launchArguments.append("-UITesting") // Optional: Can be used to reset state in AppDelegate/App struct
+        app.launchArguments.append("-UITesting")
         app.launch()
     }
     
@@ -30,14 +30,20 @@ final class FitnessUITests: XCTestCase {
 
              Launch the app using XCUIApplication().
 
-             Tap the "Buy Credits" tab bar item.
+             Tap the "Shop" tab bar item.
 
              Locate and tap the button containing the text "Starter Pack" (which adds 5 credits).
 
              Tap the "Profile" tab bar item to navigate away from the shop.
 
              Locate the static text displaying the available credits. Assert that the text value is "15" (assuming the default starting value of 10 plus the new 5).
+     */
+     
+     func testCreditPurchaseFlow() {
+         // Students: Write your test code here
+     }
 
+     /*
      2. UI Test: Spot Selection and Detail Navigation
 
          Objective: Test the NavigationStack routing and ensure dynamic elements (like the studio map grid) enable properly.
@@ -56,4 +62,8 @@ final class FitnessUITests: XCTestCase {
 
              Assert that the bottom booking button's isEnabled property is now true.
      */
+     
+     func testSpotSelectionAndDetailNavigation() {
+         // Students: Write your test code here
+     }
 }
